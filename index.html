@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Made in CE - Artístico Cultural</title>
+    <link rel="stylesheet" href="assets/css/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" v-cloak>
+        <header
+            class="bg-gradient-to-r from-purple-900 via-purple-800 to-pink-800 text-white py-4 sticky top-0 z-40 shadow-lg">
+            <div class="container mx-auto px-4 flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <img class="logo" src="assets/images/logo.png" alt="Logomarca Made IN CE">
+                </div>
+            </div>
+        </header>
+
+        <section class="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 text-white py-20">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-5xl md:text-7xl font-bold mb-4">{{ data.about.title }}</h1>
+                <p class="text-2xl md:text-3xl mb-2">{{ data.about.subtitle }}</p>
+                <p class="text-xl opacity-90">{{ data.about.location }} • {{ data.about.year }}</p>
+            </div>
+        </section>
+
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-4 max-w-4xl">
+                <h2 class="text-4xl font-bold text-gray-800 mb-8 text-center">Sobre o Projeto</h2>
+                <div class="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+                    <p v-for="(paragraph, index) in data.about.description.split('\n\n')" :key="index" class="mb-6">
+                        {{ paragraph }}
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-gray-50">
+            <div class="container mx-auto px-4 max-w-6xl">
+                <div class="flex justify-between items-center mb-12">
+                    <h2 class="text-4xl font-bold text-gray-800">Atividades</h2>
+                    <button v-if="isAdmin" @click="addActivity"
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Nova Atividade</span>
+                    </button>
+                </div>
+
+                <div class="space-y-8">
+                    <div v-for="activity in data.activities" :key="activity.id"
+                        class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition">
+                        <div v-if="editMode && editMode.type === 'activity' && editMode.id === activity.id"
+                            class="p-6 space-y-4">
+                            <input v-model="formData.title" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Título">
+                            <input v-model="formData.date" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Data">
+                            <input v-model="formData.location" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Local">
+                            <textarea v-model="formData.description" class="w-full px-4 py-2 border rounded-lg" rows="3"
+                                placeholder="Descrição"></textarea>
+                            <input v-model="formData.link" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Link">
+                            <div class="flex space-x-2">
+                                <button @click="saveActivity"
+                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition flex items-center space-x-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Salvar</span>
+                                </button>
+                                <button @click="cancelEdit"
+                                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Cancelar</button>
+                            </div>
+                        </div>
+                        <div v-else class="p-6">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex-1">
+                                    <div class="flex items-center space-x-4 mb-2">
+                                        <span class="text-4xl font-bold text-purple-600">{{ activity.number }}</span>
+                                        <div>
+                                            <h3 class="text-2xl font-bold text-gray-800">{{ activity.title }}</h3>
+                                            <p class="text-purple-600 font-semibold">{{ activity.date }}</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 mb-2">📍 {{ activity.location }}</p>
+                                    <p class="text-gray-700 leading-relaxed mb-4">{{ activity.description }}</p>
+                                    <a v-if="activity.link" :href="activity.link" target="_blank"
+                                        class="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold">
+                                        Ver mais
+                                        <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </a>
+                                </div>
+                                <div v-if="isAdmin" class="flex space-x-2 ml-4">
+                                    <button @click="editActivity(activity)" class="text-blue-600 hover:text-blue-700">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                    <button @click="deleteActivity(activity.id)"
+                                        class="text-red-600 hover:text-red-700">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-gradient-to-r from-purple-900 via-purple-800 to-pink-800 text-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold mb-12 text-center">Resumo de Impacto</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                    <div v-for="stat in data.stats" :key="stat.label" class="text-center">
+                        <div class="bg-white bg-opacity-20 rounded-xl p-6 backdrop-blur-sm">
+                            <div class="text-5xl font-bold mb-2">{{ stat.value }}</div>
+                            <div class="text-lg opacity-90">{{ stat.label }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-white">
+            <div class="container mx-auto px-4 max-w-6xl">
+                <div class="flex justify-between items-center mb-12">
+                    <h2 class="text-4xl font-bold text-gray-800">Made in CE na Mídia</h2>
+                    <button v-if="isAdmin" @click="addMedia"
+                        class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Nova Matéria</span>
+                    </button>
+                </div>
+
+                <div class="space-y-6">
+                    <div v-for="item in data.media" :key="item.id"
+                        class="bg-gray-50 rounded-xl p-6 hover:bg-gray-100 transition">
+                        <div v-if="editMode && editMode.type === 'media' && editMode.id === item.id" class="space-y-4">
+                            <input v-model="formData.source" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Fonte">
+                            <input v-model="formData.title" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Título">
+                            <input v-model="formData.link" class="w-full px-4 py-2 border rounded-lg"
+                                placeholder="Link">
+                            <div class="flex space-x-2">
+                                <button @click="saveMedia"
+                                    class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">Salvar</button>
+                                <button @click="cancelEdit"
+                                    class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition">Cancelar</button>
+                            </div>
+                        </div>
+                        <div v-else class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <p class="text-purple-600 font-bold mb-2">{{ item.source }}</p>
+                                <h3 class="text-xl font-semibold text-gray-800 mb-3">{{ item.title }}</h3>
+                                <a :href="item.link" target="_blank"
+                                    class="inline-flex items-center text-purple-600 hover:text-purple-700 font-semibold">
+                                    Ler matéria
+                                    <svg class="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            </div>
+                            <div v-if="isAdmin" class="flex space-x-2 ml-4">
+                                <button @click="editMedia(item)" class="text-blue-600 hover:text-blue-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button @click="deleteMedia(item.id)" class="text-red-600 hover:text-red-700">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 text-white">
+            <div class="container mx-auto px-4 text-center">
+                <h2 class="text-4xl font-bold mb-12">Contato</h2>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-6 md:space-y-0 md:space-x-12">
+                    <a :href="'https://instagram.com/' + data.contact.instagram.replace('@', '')" target="_blank"
+                        class="flex items-center space-x-3 text-xl hover:text-pink-300 transition">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                        </svg>
+                        <span>{{ data.contact.instagram }}</span>
+                    </a>
+                    <a :href="'https://youtube.com/' + data.contact.youtube" target="_blank"
+                        class="flex items-center space-x-3 text-xl hover:text-red-300 transition">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+                        </svg>
+                        <span>{{ data.contact.youtube }}</span>
+                    </a>
+                    <a href="https://open.spotify.com/show/madeincepondecast" target="_blank"
+                        class="flex items-center space-x-3 text-xl hover:text-green-300 transition">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z" />
+                        </svg>
+                        <span>{{ data.contact.spotify }}</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <footer class="bg-gray-900 text-white py-8">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-gray-400">© 2023-2025 Made in CE - Todos os direitos reservados</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                isAdmin: false,
+                showLogin: false,
+                editMode: null,
+                formData: {},
+                loginForm: {
+                    email: '',
+                    password: ''
+                },
+                data: {
+                    about: {
+                        title: "Made in CE",
+                        subtitle: "Artístico / Cultural",
+                        location: "Fortaleza/CE",
+                        year: "Desde 2023",
+                        description: "Nascido em 2023, o Made in CE surgiu como uma resposta à necessidade de palcos e visibilidade para a efervescente cena autoral de Fortaleza. Criado como um movimento para promover e valorizar os talentos, o coletivo se consolidou como uma plataforma vital para a descoberta e circulação da música local.\n\nO sucesso do Festival Made in CE inspirou o coletivo a criar ações contínuas, garantindo que a cena se mantenha aquecida durante todo o ano. Assim, a iniciativa se expandiu, dando origem às Made in CE Sessions, uma residência artística semanal que se tornou uma vitrine permanente para novos talentos, e ao Made in CE Podcast.\n\nO coletivo opera em um modelo de economia solidária, onde a receita simbólica de suas ações contínuas é 100% reinvestida para viabilizar as grandes ações gratuitas."
+                    },
+                    activities: [
+                        {
+                            id: 1,
+                            number: "01",
+                            title: "Festival Made in CE - 1ª Edição | 2023",
+                            date: "16 de julho de 2023",
+                            location: "Vibe 085, Iracema",
+                            description: "Primeira edição do Festival Made in CE com 07 artistas autorais de Fortaleza e região metropolitana.",
+                            link: "https://www.instagram.com/festivalmadeince"
+                        },
+                        {
+                            id: 2,
+                            number: "02",
+                            title: "Dropz - Festival Made in CE | 2023",
+                            date: "Outubro de 2023",
+                            location: "Teatro B. de Paiva",
+                            description: "Primeira edição do projeto Dropz com entrada franca e apoio do Instituto Dragão do Mar.",
+                            link: "https://www.instagram.com/festivalmadeince"
+                        },
+                        {
+                            id: 3,
+                            number: "03",
+                            title: "Festival Made in CE - 2ª Edição | 2023",
+                            date: "05 de novembro de 2023",
+                            location: "Vibe 085, Iracema",
+                            description: "Segunda edição com 09 artistas autorais de Fortaleza.",
+                            link: "https://www.instagram.com/festivalmadeince"
+                        }
+                    ],
+                    media: [
+                        {
+                            id: 1,
+                            source: "Diário do Nordeste",
+                            title: "Quer conhecer novos artistas do rock à MPB? Festival Made in CE celebra música autoral em Fortaleza",
+                            link: "#"
+                        },
+                        {
+                            id: 2,
+                            source: "Diário do Nordeste",
+                            title: "Fortaleza só tem cover? Eventos focados na música autoral cearense buscam mostrar o contrário",
+                            link: "#"
+                        }
+                    ],
+                    stats: [
+                        { label: "Anos de Atuação", value: "+2" },
+                        { label: "Festivais Realizados", value: "03" },
+                        { label: "Episódios de Podcast", value: "53" },
+                        { label: "Artistas Divulgados", value: "+100" },
+                        { label: "Pessoas Alcançadas", value: "+3.000" }
+                    ],
+                    contact: {
+                        instagram: "@festivalmadeince",
+                        youtube: "@FestivalMadeinCE",
+                        spotify: "Podcast Made in CE"
+                    }
+                }
+            };
+        },
+        methods: {
+            handleLogin() {
+                // Simulação - depois conectar com Supabase
+                if (this.loginForm.email && this.loginForm.password) {
+                    this.isAdmin = true;
+                    this.showLogin = false;
+                    alert('Login realizado! (simulação)');
+                }
+            },
+            handleLogout() {
+                this.isAdmin = false;
+                this.editMode = null;
+            },
+            addActivity() {
+                const newActivity = {
+                    id: Date.now(),
+                    number: String(this.data.activities.length + 1).padStart(2, '0'),
+                    title: "Nova Atividade",
+                    date: "",
+                    location: "",
+                    description: "",
+                    link: ""
+                };
+                this.data.activities.push(newActivity);
+                this.editActivity(newActivity);
+            },
+            editActivity(activity) {
+                this.editMode = { type: 'activity', id: activity.id };
+                this.formData = { ...activity };
+            },
+            saveActivity() {
+                const index = this.data.activities.findIndex(a => a.id === this.formData.id);
+                if (index !== -1) {
+                    this.data.activities[index] = { ...this.formData };
+                }
+                this.cancelEdit();
+            },
+            deleteActivity(id) {
+                if (confirm('Tem certeza que deseja excluir?')) {
+                    this.data.activities = this.data.activities.filter(a => a.id !== id);
+                }
+            },
+            addMedia() {
+                const newMedia = {
+                    id: Date.now(),
+                    source: "",
+                    title: "",
+                    link: ""
+                };
+                this.data.media.push(newMedia);
+                this.editMedia(newMedia);
+            },
+            editMedia(media) {
+                this.editMode = { type: 'media', id: media.id };
+                this.formData = { ...media };
+            },
+            saveMedia() {
+                const index = this.data.media.findIndex(m => m.id === this.formData.id);
+                if (index !== -1) {
+                    this.data.media[index] = { ...this.formData };
+                }
+                this.cancelEdit();
+            },
+            deleteMedia(id) {
+                if (confirm('Tem certeza que deseja excluir?')) {
+                    this.data.media = this.data.media.filter(m => m.id !== id);
+                }
+            },
+            cancelEdit() {
+                this.editMode = null;
+                this.formData = {};
+            }
+        }
+    }).mount('#app');
+</script>
