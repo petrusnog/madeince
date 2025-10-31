@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Made in CE - Artístico Cultural</title>
     <link rel="stylesheet" href="assets/css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/vue@3.3.4/dist/vue.global.prod.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -19,18 +23,52 @@
     <div id="app" v-cloak>
         <header
             class="bg-gradient-to-r from-purple-900 via-purple-800 to-pink-800 text-white py-4 sticky top-0 z-40 shadow-lg">
-            <div class="container mx-auto px-4 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <img class="logo" src="assets/images/logo.png" alt="Logomarca Made IN CE">
+            <div class="container mx-auto px-4">
+                <div class="flex justify-between">
+                    <!-- Logo -->
+                    <div class="flex items-center space-x-3">
+                        <img class="logo" src="assets/images/logo.png" alt="Logomarca Made IN CE">
+                    </div>
+
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden md:flex items-center space-x-8">
+                        <a href="#sobre" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Sobre</span>
+                        </a>
+                        <a href="#atividades" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Atividades</span>
+                        </a>
+                        <a href="#impacto" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Impacto</span>
+                        </a>
+                        <a href="#midia" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+                            <i class="fas fa-newspaper"></i>
+                            <span>Mídia</span>
+                        </a>
+                        <a href="#contato" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+                            <i class="fas fa-envelope"></i>
+                            <span>Contato</span>
+                        </a>
+                    </nav>
                 </div>
             </div>
         </header>
 
-        <section class="bg-gradient-to-br from-purple-900 via-purple-800 to-pink-800 text-white py-20">
-            <div class="container mx-auto px-4 text-center">
+        <section class="initial relative text-white py-20 overflow-hidden">
+            <!-- Background Image -->
+            <div class="absolute inset-0 z-0">
+                <img src="assets/images/initial.jpg" alt="Background Made in CE" class="w-full h-full object-cover">
+                <!-- Overlay gradient para manter legibilidade -->
+                <div class="absolute inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70">
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
                 <h1 class="text-5xl md:text-7xl font-bold mb-4">{{ data.about.title }}</h1>
-                <p class="text-2xl md:text-3xl mb-2">{{ data.about.subtitle }}</p>
-                <p class="text-xl opacity-90">{{ data.about.location }} • {{ data.about.year }}</p>
             </div>
         </section>
 
@@ -262,7 +300,7 @@
                 },
                 data: {
                     about: {
-                        title: "Made in CE",
+                        title: "Transformando a cena da música autoral cearense desde 2023.",
                         subtitle: "Artístico / Cultural",
                         location: "Fortaleza/CE",
                         year: "Desde 2023",
