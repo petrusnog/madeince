@@ -68,7 +68,7 @@
 
             <!-- Content -->
             <div class="container mx-auto px-4 relative z-10 flex flex-col items-center text-center">
-                <h1 class="text-5xl md:text-7xl font-bold mb-4">{{ data.about.title }}</h1>
+                <h1 class="font-bold mb-4">{{ data.about.title }}</h1>
             </div>
         </section>
 
@@ -438,4 +438,30 @@
             }
         }
     }).mount('#app');
+
+    // Sistema de header que diminui no scroll com proteção contra loops
+    let isScrolled = false;
+    let scrollTimeout;
+
+    function handleScroll() {
+        const header = document.querySelector('header');
+        const scrollPosition = window.scrollY;
+        
+        // Usar hysteresis para evitar oscilação:
+        // - Ativa em 120px (scrolling down)
+        // - Desativa em 80px (scrolling up)
+        if (!isScrolled && scrollPosition > 120) {
+            isScrolled = true;
+            header.classList.add('scrolled');
+        } else if (isScrolled && scrollPosition < 80) {
+            isScrolled = false;
+            header.classList.remove('scrolled');
+        }
+    }
+
+    // Debounce do scroll para melhor performance
+    window.addEventListener('scroll', function() {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(handleScroll, 10);
+    });
 </script>
