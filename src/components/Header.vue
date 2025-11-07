@@ -12,23 +12,23 @@
 
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex items-center space-x-8">
-          <a href="#sobre" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+          <a href="#sobre" @click.prevent="scrollToSection('sobre')" class="hover:text-pink-300 transition font-medium flex items-center space-x-2 cursor-pointer">
             <i class="fas fa-info-circle"></i>
             <span>Sobre</span>
           </a>
-          <a href="#atividades" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+          <a href="#atividades" @click.prevent="scrollToSection('atividades')" class="hover:text-pink-300 transition font-medium flex items-center space-x-2 cursor-pointer">
             <i class="fas fa-calendar-alt"></i>
             <span>Atividades</span>
           </a>
-          <a href="#impacto" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+          <a href="#impacto" @click.prevent="scrollToSection('impacto')" class="hover:text-pink-300 transition font-medium flex items-center space-x-2 cursor-pointer">
             <i class="fas fa-chart-line"></i>
             <span>Impacto</span>
           </a>
-          <a href="#midia" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+          <a href="#midia" @click.prevent="scrollToSection('midia')" class="hover:text-pink-300 transition font-medium flex items-center space-x-2 cursor-pointer">
             <i class="fas fa-newspaper"></i>
             <span>Mídia</span>
           </a>
-          <a href="#contato" class="hover:text-pink-300 transition font-medium flex items-center space-x-2">
+          <a href="#contato" @click.prevent="scrollToSection('contato')" class="hover:text-pink-300 transition font-medium flex items-center space-x-2 cursor-pointer">
             <i class="fas fa-envelope"></i>
             <span>Contato</span>
           </a>
@@ -50,6 +50,21 @@ const handleScroll = () => {
     isScrolled.value = true
   } else if (isScrolled.value && scrollPosition < 80) {
     isScrolled.value = false
+  }
+}
+
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId)
+  if (element) {
+    const header = document.querySelector('header')
+    const headerHeight = header?.offsetHeight || 80
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+    const offsetPosition = elementPosition - headerHeight - 20 // 20px de margem extra
+    
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    })
   }
 }
 
